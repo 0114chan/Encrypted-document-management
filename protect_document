@@ -1,0 +1,93 @@
+// User.java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String username;
+    private String password;
+    // 기타 필요한 필드
+}
+
+// Document.java
+@Entity
+public class Document {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String title;
+    private String encryptedContent;
+    @ManyToOne
+    private User owner;
+    // 기타 필요한 필드
+}
+
+// UserRepository.java
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByUsername(String username);
+}
+
+// DocumentRepository.java
+@Repository
+public interface DocumentRepository extends JpaRepository<Document, Long> {
+    List<Document> findByOwner(User owner);
+}
+
+// UserService.java
+@Service
+public class UserService {
+    @Autowired
+    private UserRepository userRepository;
+    
+    public User registerUser(User user) {
+        // 비밀번호 암호화 등의 로직
+        return userRepository.save(user);
+    }
+    
+    // 기타 메서드
+}
+
+// DocumentService.java
+@Service
+public class DocumentService {
+    @Autowired
+    private DocumentRepository documentRepository;
+    
+    public Document saveDocument(Document document) {
+        // 문서 암호화 로직
+        return documentRepository.save(document);
+    }
+    
+    // 기타 메서드
+}
+
+// UserController.java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+    @Autowired
+    private UserService userService;
+    
+    @PostMapping("/register")
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
+        return ResponseEntity.ok(userService.registerUser(user));
+    }
+    
+    // 기타 엔드포인트
+}
+
+// DocumentController.java
+@RestController
+@RequestMapping("/api/documents")
+public class DocumentController {
+    @Autowired
+    private DocumentService documentService;
+    
+    @PostMapping
+    public ResponseEntity<Document> createDocument(@RequestBody Document document) {
+        return ResponseEntity.ok(documentService.saveDocument(document));
+    }
+    
+    // 기타 엔드포인트
+}
