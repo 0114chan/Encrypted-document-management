@@ -1,0 +1,95 @@
+// App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Login from './components/Login';
+import Register from './components/Register';
+import DocumentList from './components/DocumentList';
+import DocumentDetail from './components/DocumentDetail';
+
+function App() {
+  return (
+    <Router>
+      <Switch>
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+        <Route path="/documents" exact component={DocumentList} />
+        <Route path="/documents/:id" component={DocumentDetail} />
+      </Switch>
+    </Router>
+  );
+}
+
+export default App;
+
+// Login.js
+import React, { useState } from 'react';
+import axios from 'axios';
+
+function Login() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/api/users/login', { username, password });
+      // 로그인 처리 로직
+    } catch (error) {
+      console.error('Login failed', error);
+    }
+  };
+
+  return (
+    <form onSubmit={handleLogin}>
+      <input
+        type="text"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Username"
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+      />
+      <button type="submit">Login</button>
+    </form>
+  );
+}
+
+export default Login;
+
+// DocumentList.js
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function DocumentList() {
+  const [documents, setDocuments] = useState([]);
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      try {
+        const response = await axios.get('/api/documents');
+        setDocuments(response.data);
+      } catch (error) {
+        console.error('Failed to fetch documents', error);
+      }
+    };
+
+    fetchDocuments();
+  }, []);
+
+  return (
+    <div>
+      <h1>My Documents</h1>
+      <ul>
+        {documents.map((doc) => (
+          <li key={doc.id}>{doc.title}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default DocumentList;
